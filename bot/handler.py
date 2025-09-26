@@ -110,7 +110,7 @@ async def order_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "</blockquote>"
     )
     keyboard = [
-        [InlineKeyboardButton("LIVE RECORD : PERBULAN ( V1 )", callback_data="live_temp_callback")],
+        [InlineKeyboardButton("LIVE RECORD : PERBULAN", callback_data="live_temp_callback")],
         [InlineKeyboardButton("LIVE RECORD : HOST PILIHAN", callback_data="live_perm_v1")],
         [InlineKeyboardButton("LIVE RECORD : DATABASE", callback_data="live_perm_v2")],
     ]

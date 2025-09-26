@@ -51,10 +51,11 @@ class TelegramBot:
         
         """ ADMIN MENU """
         self.app.add_handler(CommandHandler("admin", admin_command, filters=filters.ChatType.PRIVATE))
-        self.app.add_handler(CommandHandler("broadcast", broadcast_handler, filters=filters.ChatType.PRIVATE, block=False))
-        self.app.add_handler(CommandHandler("vipbroadcast", vipbroadcast_handler, filters=filters.ChatType.PRIVATE, block=False))
         self.app.add_handler(CommandHandler("broadcastpin", broadcast_and_pin_handler, filters=filters.ChatType.PRIVATE, block=False))
         self.app.add_handler(CommandHandler("vipbroadcastpin", vipbroadcast_and_pin_handler, filters=filters.ChatType.PRIVATE, block=False))
+        
+        self.app.add_handler(CommandHandler("broadcast", broadcast_handler, filters=filters.ChatType.PRIVATE, block=False))
+        self.app.add_handler(CommandHandler("vipbroadcast", vipbroadcast_handler, filters=filters.ChatType.PRIVATE, block=False))
         self.app.add_handler(CommandHandler("cekuser", cekuser_command, filters=filters.ChatType.PRIVATE))
         self.app.add_handler(CommandHandler("addv1", add_v1, filters=filters.ChatType.PRIVATE))
         self.app.add_handler(CommandHandler("addv2", add_host_pilihan, filters=filters.ChatType.PRIVATE))
