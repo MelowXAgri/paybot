@@ -21,17 +21,17 @@
             "required": true
         },
         "CHANNEL_ID": {
-            "description": "Telegram Channel ID Group VIP",
+            "description": "Telegram Channel ID GROUP VIP MONTHLY",
             "value": "-1002797728250",
             "required": true
         },
         "CHANNEL_ID_1": {
-            "description": "Telegram Channel ID Group INDO VIP",
+            "description": "Telegram Channel ID GROUP HOST PILIHAN",
             "value": "-1002666991595",
             "required": true
         },
         "CHANNEL_ID_2": {
-            "description": "Telegram Channel ID Group CCTV VIP",
+            "description": "Telegram Channel ID GROUP DATABASE RECORD",
             "value": "-1003099178684",
             "required": true
         },
