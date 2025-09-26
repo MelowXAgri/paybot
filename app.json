@@ -1,0 +1,59 @@
+{
+    "name": "bot-vip-auto",
+    "description": "A Telegram bot",
+    "repository": "https://github.com/MelowXAgri/paybot",
+    "stack": "heroku-24",
+    "buildpacks": [
+        {
+            "url": "heroku/python"
+        }
+    ],
+    "formation": {
+        "worker": {
+            "quantity": 1,
+            "size": "basic"
+        }
+    },
+    "env": {
+        "BOT_TOKEN": {
+            "description": "Telegram Bot Token",
+            "value": "8298153139:AAECdWZsxaruS6cn0-zfMS8r6Tmrl_2xWSA",
+            "required": true
+        },
+        "CHANNEL_ID": {
+            "description": "Telegram Channel ID Group VIP",
+            "value": "-1002797728250",
+            "required": true
+        },
+        "CHANNEL_ID_1": {
+            "description": "Telegram Channel ID Group INDO VIP",
+            "value": "-1002666991595",
+            "required": true
+        },
+        "CHANNEL_ID_2": {
+            "description": "Telegram Channel ID Group CCTV VIP",
+            "value": "-1003099178684",
+            "required": true
+        },
+        "ADMIN_ID": {
+            "description": "Bot Admin ID, split with comma",
+            "value": "692043981,1516420756,7481738979,7830551403",
+            "required": true
+        },
+        "FORCE_SUB_CHANNEL_ID": {
+            "description": "Telegram Channel ID Group Force Sub",
+            "value": "-1002601296115",
+            "required": true
+        },
+        "FORCE_SUB_CHANNEL_NAME": {
+            "description": "Telegram Channel Name Group Force Sub",
+            "value": "https://t.me/AwwwRelaxKiddo",
+            "required": true
+        },
+        "MONGO_URI": {
+            "description": "MongoDB URI",
+            "value": "mongodb+srv://raze98fhx:xgM9MDTC4eue333Y@cluster0.nu84e.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+            "required": true
+        }
+    }
+}
