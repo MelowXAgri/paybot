@@ -42,12 +42,12 @@
         },
         "FORCE_SUB_CHANNEL_ID": {
             "description": "Telegram Channel ID Group Force Sub",
-            "value": "-1002601296115",
+            "value": "-1002518937366",
             "required": true
         },
         "FORCE_SUB_CHANNEL_NAME": {
             "description": "Telegram Channel Name Group Force Sub",
-            "value": "https://t.me/AwwwRelaxKiddo",
+            "value": "https://t.me/infoviprobot",
             "required": true
         },
         "MONGO_URI": {
