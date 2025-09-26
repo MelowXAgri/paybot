@@ -17,7 +17,7 @@
     "env": {
         "BOT_TOKEN": {
             "description": "Telegram Bot Token",
-            "value": "8298153139:AAECdWZsxaruS6cn0-zfMS8r6Tmrl_2xWSA",
+            "value": "8298153139:AAHPjtOibMZgqgg3YrbyQt6_hup_e3O7hbw",
             "required": true
         },
         "CHANNEL_ID": {
