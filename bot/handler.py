@@ -828,8 +828,8 @@ async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def get_mutasi():
     url = "https://orkut.ftvpn.me/api/mutasi"
     payload = {
-        "auth_username": USERNAME,
-        "auth_token": TOKEN
+        "auth_username": Config.ORDER_KUOTA_USERNAME,
+        "auth_token": Config.ORDER_KUOTA_AUTHTOKEN
     }
     headers = {
         "Content-Type": "application/json"
@@ -1018,4 +1018,5 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
             await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_PERM_2, user_id=user_id)
+
             await context.bot.send_message(user_id, "Anda belum berlangganan DATABASE RECORD.")
