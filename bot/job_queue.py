@@ -27,7 +27,10 @@ async def remove_expired_vip_job(context: ContextTypes.DEFAULT_TYPE):
                 await vip_users.delete_one({"user_id": user_id})
                 await asyncio.sleep(5)
             except Exception as e:
-                print(traceback.format_exc())
+                if "Participant_id_invalid" in str(e):
+                    pass
+                else:
+                    print(traceback.format_exc())
             try:
                 await app.bot.send_message(
                     chat_id=user_id,

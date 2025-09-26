@@ -11,7 +11,7 @@ from telegram.ext import ContextTypes
 from database import UserRepository, QrisRepository, PromoRepository
 from config import Config
 
-import asyncio, random, pytz, requests
+import asyncio, random, pytz, aiohttp
 
 from .button import (
     payment_markup,
@@ -19,6 +19,14 @@ from .button import (
 )
 from .price import PRICE, PERMANENT, PROMO_V1, get_qris_payment
 from .subscriber import force_sub_channel, refresh_callback
+from io import BytesIO
+
+async def download_file(url: str) -> BytesIO:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            resp.raise_for_status()
+            return BytesIO(await resp.read())
+
 
 user_repository = UserRepository()
 qris_repository = QrisRepository()
@@ -397,7 +405,6 @@ async def promo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     if user_id in Config.ADMIN_ID:
-        print(len(context.args))
         if len(context.args) == 1:
             promo_status = False
             if context.args[0] == "on":
@@ -483,34 +490,39 @@ async def promo_v1_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "monthly"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "monthly"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def promo_host_pilihan_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -539,34 +551,39 @@ async def promo_host_pilihan_qris(update: Update, context: ContextTypes.DEFAULT_
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "host_pilihan"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "host_pilihan"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def promo_database_record_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -595,34 +612,39 @@ async def promo_database_record_qris(update: Update, context: ContextTypes.DEFAU
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "database_record"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "database_record"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -667,34 +689,39 @@ async def callback_live_temp_qris(update: Update, context: ContextTypes.DEFAULT_
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "monthly"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "monthly"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def callback_host_pilihan_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -723,34 +750,39 @@ async def callback_host_pilihan_qris(update: Update, context: ContextTypes.DEFAU
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "host_pilihan"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "host_pilihan"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def callback_database_record_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -779,34 +811,39 @@ async def callback_database_record_qris(update: Update, context: ContextTypes.DE
     except:
         pass
     caption = (
-        "<blockquote>"
         "Scan QRIS ini untuk pembayaran.\n\n"
         f"<b>Jumlah:</b> Rp {total_price}\n"
         f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
-        "QRIS akan kadaluarsa dalam 10 menit."
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
         "</blockquote>"
     )
     keyboard = [
         [InlineKeyboardButton("CANCEL", callback_data="cancel")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    msg = await update.callback_query.message.reply_photo(
-        qris_url,
-        caption=caption,
-        reply_markup=reply_markup,
-        parse_mode=ParseMode.HTML
-    )
-    await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
-    context.job_queue.run_repeating(
-        check_qris_payment, interval=60, first=30, user_id=user_id,
-        data={
-            "total_price": total_price, 
-            "user_id": user_id, 
-            "username": username, 
-            "msg_id": msg.id, 
-            "subscription": "database_record"
-        }
-    )
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=60, first=30, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "database_record"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -825,7 +862,7 @@ async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.message.reply_text("Anda tidak memiliki order yang sedang berlangsung.")
 
 """ Check payment """
-def get_mutasi():
+async def get_mutasi():
     url = "https://orkut.ftvpn.me/api/mutasi"
     payload = {
         "auth_username": Config.ORDER_KUOTA_USERNAME,
@@ -835,12 +872,17 @@ def get_mutasi():
         "Content-Type": "application/json"
     }
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        return response.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers) as resp:
+                resp.raise_for_status()
+                return await resp.json()
     except Exception as e:
         print("❌ Error:", e)
-        print("Raw response:", response.text if 'response' in locals() else "No response")
+        try:
+            data = await resp.json()
+            print(data)
+        except:
+            pass
         return None
 
 async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
@@ -857,14 +899,10 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
     
     expiry = order['expiry'].replace(tzinfo=pytz.UTC).astimezone(Config.TIMEZONE)
     msg_id = order['msg_id']
-    histories = None
-    try:
-        histories = get_mutasi()
-    except:
-        pass
-    if histories == None:
-        await asyncio.sleep(5)
+    histories = await get_mutasi()
+    if histories is None:
         return
+    print("Getting success history:", histories["status"])
     if histories["status"]:
         for history in histories['data']:
             if history['type'] == 'CR' and int(history['amount']) == total_price:
@@ -901,21 +939,24 @@ async def create_temp_link(bot_instance):
     return invite_link.invite_link
 
 async def monthly_v1_success(bot_instance, user_id, duration, username=""):
-    if type(duration) == int:
-        try:
-            invite_link = await create_temp_link(bot_instance)
-        except:
-            print(f"Failed: ( {Config.CHANNEL_TEMP} ) | ( {user_id} ) | ( {username} )")
-        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(days=duration)
-        await user_repository.add_temp_user(user_id, expiry)
-        caption = (
-            "<blockquote>"
-            "🎉 Pembayaran berhasil!\n\n"
-            f"🔥 Klik link ini untuk join grup Live Record Monthly: <a href='{invite_link}'>Join VIP</a>\n"
-            "⚠️ Link akan kadaluarsa dalam 1 jam!"
-            "</blockquote>"
-        )
-        await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+    try:
+        if type(duration) == int:
+            try:
+                invite_link = await create_temp_link(bot_instance)
+            except:
+                print(f"Failed: ( {Config.CHANNEL_TEMP} ) | ( {user_id} ) | ( {username} )")
+            expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(days=duration)
+            await user_repository.add_temp_user(user_id, expiry)
+            caption = (
+                "<blockquote>"
+                "🎉 Pembayaran berhasil!\n\n"
+                f"🔥 Klik link ini untuk join grup Live Record Monthly: <a href='{invite_link}'>Join VIP</a>\n"
+                "⚠️ Link akan kadaluarsa dalam 1 jam!"
+                "</blockquote>"
+            )
+            await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        print("Error vip monthly:", e)
         
 """ Successfull payment button 2 """
 async def create_perm_link_v1(bot_instance):

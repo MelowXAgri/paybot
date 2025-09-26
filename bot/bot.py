@@ -3,7 +3,8 @@ from telegram.ext import (
     CallbackQueryHandler,
     ChatJoinRequestHandler,
     CommandHandler,
-    filters
+    filters,
+    Defaults
 )
 from config import Config
 from .callback import (
@@ -42,7 +43,7 @@ from .subscriber import refresh_callback
 
 class TelegramBot:
     def __init__(self):
-        self.app = Application.builder().token(Config.BOT_TOKEN).build()
+        self.app = Application.builder().token(Config.BOT_TOKEN).get_updates_read_timeout(120).get_updates_connect_timeout(30).build()
 
     def register_handler(self):
         self.app.add_handler(CommandHandler("start", start_command, filters=filters.ChatType.PRIVATE))
