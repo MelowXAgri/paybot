@@ -11,7 +11,7 @@ from telegram.ext import ContextTypes
 from database import UserRepository, QrisRepository, PromoRepository
 from config import Config
 
-import asyncio, random, pytz, requests
+import asyncio, random, pytz, aiohttp
 
 from .button import (
     payment_markup,
@@ -397,7 +397,6 @@ async def promo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
     if user_id in Config.ADMIN_ID:
-        print(len(context.args))
         if len(context.args) == 1:
             promo_status = False
             if context.args[0] == "on":
@@ -691,7 +690,7 @@ async def callback_live_temp_qris(update: Update, context: ContextTypes.DEFAULT_
             "total_price": total_price, 
             "user_id": user_id, 
             "username": username, 
-            "msg_id": msg.id, 
+            "msg_id": msg.id,
             "subscription": "monthly"
         }
     )
@@ -825,7 +824,7 @@ async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.message.reply_text("Anda tidak memiliki order yang sedang berlangsung.")
 
 """ Check payment """
-def get_mutasi():
+async def get_mutasi():
     url = "https://orkut.ftvpn.me/api/mutasi"
     payload = {
         "auth_username": Config.ORDER_KUOTA_USERNAME,
@@ -835,12 +834,17 @@ def get_mutasi():
         "Content-Type": "application/json"
     }
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        return response.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=payload, headers=headers) as resp:
+                resp.raise_for_status()
+                return await resp.json()
     except Exception as e:
         print("❌ Error:", e)
-        print("Raw response:", response.text if 'response' in locals() else "No response")
+        try:
+            data = await resp.json()
+            print(data)
+        except:
+            pass
         return None
 
 async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
@@ -857,14 +861,10 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
     
     expiry = order['expiry'].replace(tzinfo=pytz.UTC).astimezone(Config.TIMEZONE)
     msg_id = order['msg_id']
-    histories = None
-    try:
-        histories = get_mutasi()
-    except:
-        pass
-    if histories == None:
-        await asyncio.sleep(5)
+    histories = await get_mutasi()
+    if histories is None:
         return
+    print("Getting success history:", histories["status"])
     if histories["status"]:
         for history in histories['data']:
             if history['type'] == 'CR' and int(history['amount']) == total_price:
@@ -901,21 +901,24 @@ async def create_temp_link(bot_instance):
     return invite_link.invite_link
 
 async def monthly_v1_success(bot_instance, user_id, duration, username=""):
-    if type(duration) == int:
-        try:
-            invite_link = await create_temp_link(bot_instance)
-        except:
-            print(f"Failed: ( {Config.CHANNEL_TEMP} ) | ( {user_id} ) | ( {username} )")
-        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(days=duration)
-        await user_repository.add_temp_user(user_id, expiry)
-        caption = (
-            "<blockquote>"
-            "🎉 Pembayaran berhasil!\n\n"
-            f"🔥 Klik link ini untuk join grup Live Record Monthly: <a href='{invite_link}'>Join VIP</a>\n"
-            "⚠️ Link akan kadaluarsa dalam 1 jam!"
-            "</blockquote>"
-        )
-        await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+    try:
+        if type(duration) == int:
+            try:
+                invite_link = await create_temp_link(bot_instance)
+            except:
+                print(f"Failed: ( {Config.CHANNEL_TEMP} ) | ( {user_id} ) | ( {username} )")
+            expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(days=duration)
+            await user_repository.add_temp_user(user_id, expiry)
+            caption = (
+                "<blockquote>"
+                "🎉 Pembayaran berhasil!\n\n"
+                f"🔥 Klik link ini untuk join grup Live Record Monthly: <a href='{invite_link}'>Join VIP</a>\n"
+                "⚠️ Link akan kadaluarsa dalam 1 jam!"
+                "</blockquote>"
+            )
+            await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        print("Error vip monthly:", e)
         
 """ Successfull payment button 2 """
 async def create_perm_link_v1(bot_instance):
