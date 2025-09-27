@@ -933,7 +933,7 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
 """ Successfull payment button 1 """
 async def create_temp_link(bot_instance):
     try:
-        chat = bot_instance.get_chat(Config.CHANNEL_TEMP)
+        chat = await bot_instance.get_chat(Config.CHANNEL_TEMP)
         expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
         try:
             invite_link = await bot_instance.create_chat_invite_link(
@@ -967,7 +967,7 @@ async def monthly_v1_success(bot_instance, user_id, duration, username=""):
 """ Successfull payment button 2 """
 async def create_perm_link_v1(bot_instance):
     try:
-        chat = bot_instance.get_chat(Config.CHANNEL_PERM_1)
+        chat = await bot_instance.get_chat(Config.CHANNEL_PERM_1)
         expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
         try:
             invite_link = await bot_instance.create_chat_invite_link(
@@ -996,7 +996,7 @@ async def permanent_v1_success(bot_instance, user_id, duration, username=""):
 """ Successfull payment button 3 """
 async def create_perm_link_v2(bot_instance):
     try:
-        chat = bot_instance.get_chat(Config.CHANNEL_PERM_2)
+        chat = await bot_instance.get_chat(Config.CHANNEL_PERM_2)
         expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
         try:
             invite_link = await bot_instance.create_chat_invite_link(
