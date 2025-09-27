@@ -932,11 +932,19 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
 
 """ Successfull payment button 1 """
 async def create_temp_link(bot_instance):
-    expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
-    invite_link = await bot_instance.create_chat_invite_link(
-        chat_id=Config.CHANNEL_TEMP, expire_date=expiry, creates_join_request=True
-    )
-    return invite_link.invite_link
+    try:
+        chat = bot_instance.get_chat(Config.CHANNEL_TEMP)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_TEMP, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
 
 async def monthly_v1_success(bot_instance, user_id, duration, username=""):
     try:
@@ -948,11 +956,9 @@ async def monthly_v1_success(bot_instance, user_id, duration, username=""):
             expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(days=duration)
             await user_repository.add_temp_user(user_id, expiry)
             caption = (
-                "<blockquote>"
                 "🎉 Pembayaran berhasil!\n\n"
-                f"🔥 Klik link ini untuk join grup Live Record Monthly: <a href='{invite_link}'>Join VIP</a>\n"
-                "⚠️ Link akan kadaluarsa dalam 1 jam!"
-                "</blockquote>"
+                f"🔥 Link: {invite_link}\n\n"
+                "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
             )
             await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
     except Exception as e:
@@ -960,11 +966,19 @@ async def monthly_v1_success(bot_instance, user_id, duration, username=""):
         
 """ Successfull payment button 2 """
 async def create_perm_link_v1(bot_instance):
-    expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
-    invite_link = await bot_instance.create_chat_invite_link(
-        chat_id=Config.CHANNEL_PERM_1, expire_date=expiry, creates_join_request=True
-    )
-    return invite_link.invite_link
+    try:
+        chat = bot_instance.get_chat(Config.CHANNEL_PERM_1)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_PERM_1, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
 
 async def permanent_v1_success(bot_instance, user_id, duration, username=""):
     try:
@@ -973,21 +987,27 @@ async def permanent_v1_success(bot_instance, user_id, duration, username=""):
         print(f"Failed: ( {Config.CHANNEL_PERM_1} ) | ( {user_id} ) | ( {username} )")
     await user_repository.add_perm_v1(user_id)
     caption = (
-        "<blockquote>"
         "🎉 Pembayaran berhasil!\n\n"
-        f"🔥 Klik link ini untuk join grup Host Pilihan: <a href='{invite_link}'>Join VIP</a>\n"
-        "⚠️ Link akan kadaluarsa dalam 1 jam!"
-        "</blockquote>"
+        f"🔥 Link: {invite_link}\n\n"
+        "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
     )
     await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
 
 """ Successfull payment button 3 """
 async def create_perm_link_v2(bot_instance):
-    expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
-    invite_link = await bot_instance.create_chat_invite_link(
-        chat_id=Config.CHANNEL_PERM_2, expire_date=expiry, creates_join_request=True
-    )
-    return invite_link.invite_link
+    try:
+        chat = bot_instance.get_chat(Config.CHANNEL_PERM_2)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_PERM_2, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
 
 async def permanent_v2_success(bot_instance, user_id, duration, username=""):
     try:
@@ -996,11 +1016,9 @@ async def permanent_v2_success(bot_instance, user_id, duration, username=""):
         print(f"Failed: ( {Config.CHANNEL_PERM_2} ) | ( {user_id} ) | ( {username} )")
     await user_repository.add_perm_v2(user_id)
     caption = (
-        "<blockquote>"
         "🎉 Pembayaran berhasil!\n\n"
-        f"🔥 Klik link ini untuk join grup Database Record: <a href='{invite_link}'>Join VIP</a>\n"
-        "⚠️ Link akan kadaluarsa dalam 1 jam!"
-        "</blockquote>"
+        f"🔥 Link: {invite_link}\n\n"
+        "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
     )
     await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
 
@@ -1039,7 +1057,14 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
     if req.chat.id == Config.CHANNEL_TEMP:
         member = await user_repository.temp_user.find_one({"user_id": user_id})
         if member:
-            await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_TEMP, user_id=user_id)
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_TEMP, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_TEMP:", e)
+                return
             await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_TEMP, user_id=user_id)
@@ -1047,7 +1072,14 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
     elif req.chat.id == Config.CHANNEL_PERM_1:
         member = await user_repository.perm_v1.find_one({"user_id": user_id})
         if member:
-            await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_PERM_1, user_id=user_id)
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_PERM_1, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_PERM_1:", e)
+                return
             await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_PERM_1, user_id=user_id)
@@ -1055,9 +1087,15 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
     elif req.chat.id == Config.CHANNEL_PERM_2:
         member = await user_repository.perm_v2.find_one({"user_id": user_id})
         if member:
-            await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_PERM_2, user_id=user_id)
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_PERM_2, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_PERM_2:", e)
+                return
             await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_PERM_2, user_id=user_id)
-
             await context.bot.send_message(user_id, "Anda belum berlangganan DATABASE RECORD.")
