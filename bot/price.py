@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 PRICE = [
     {
-        "label": "IDR 23.000 : 1 Bulan",
+        "label": "IDR 1.000 : 1 Bulan",
         "price": {
-            "qris": 23000,
+            "qris": 1000,
             "trakteer": 23
         },
         "duration": 30
     },
     {
-        "label": "IDR 130.000 : 6 Bulan",
+        "label": "IDR 2.000 : 6 Bulan",
         "price": {
-            "qris": 130000,
+            "qris": 2000,
             "trakteer": 130
         },
         "duration": 180
     },
     {
-        "label": "IDR 276.000 : 1 Tahun",
+        "label": "IDR 3.000 : 1 Tahun",
         "price": {
-            "qris": 276000,
+            "qris": 3000,
             "trakteer": 276
         },
         "duration": 365
@@ -27,9 +27,9 @@ PRICE = [
 ]
 
 PROMO_V1 = {
-    "label": "IDR 18.000",
+    "label": "IDR 4.000",
     "price": {
-        "qris": 18000,
+        "qris": 4000,
         "trakteer": 18
     },
     "duration": 30
@@ -40,12 +40,12 @@ PERMANENT = {
         "label": "LIVE RECORD : HOST PILIHAN",
         "price": {
             "default": {
-                "price": 170000,
-                "label": "IDR 170.000"
+                "price": 5000,
+                "label": "IDR 5.000"
             },
             "promo": {
-                "price": 100000,
-                "label": "IDR 100.000"
+                "price": 6000,
+                "label": "IDR 6.000"
             }
         }
     },
@@ -53,12 +53,12 @@ PERMANENT = {
         "label": "DATABASE RECORD",
         "price": {
             "default": {
-                "price": 500000,
-                "label": "IDR 500.000"
+                "price": 7000,
+                "label": "IDR 7.000"
             },
             "promo": {
-                "price": 350000,
-                "label": "IDR 350.000"
+                "price": 8000,
+                "label": "IDR 8.000"
             }
         }
     }

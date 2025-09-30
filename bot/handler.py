@@ -982,7 +982,7 @@ async def create_perm_link_v1(bot_instance):
 
 async def permanent_v1_success(bot_instance, user_id, duration, username=""):
     try:
-        invite_link = create_perm_link_v1(bot_instance)
+        invite_link = await create_perm_link_v1(bot_instance)
     except:
         print(f"Failed: ( {Config.CHANNEL_PERM_1} ) | ( {user_id} ) | ( {username} )")
     await user_repository.add_perm_v1(user_id)
