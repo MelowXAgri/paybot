@@ -11,8 +11,8 @@ from telegram.ext import ContextTypes
 from database import UserRepository, QrisRepository, PromoRepository
 from config import Config
 
-import asyncio, random, pytz, aiohttp
-
+import asyncio, random, pytz, aiohttp, time, json
+from aiohttp_socks import ProxyConnector
 from .button import (
     payment_markup,
     
@@ -21,12 +21,55 @@ from .price import PRICE, PERMANENT, PROMO_V1, get_qris_payment
 from .subscriber import force_sub_channel, refresh_callback
 from io import BytesIO
 
+PROXY_URL = "socks5://a0b7T4I2E4y9:M8I0Z1R1q0m8@45.196.227.212:9139"  # ubah sesuai proxy lo
+TIMEOUT = aiohttp.ClientTimeout(total=15)
+
 async def download_file(url: str) -> BytesIO:
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             resp.raise_for_status()
             return BytesIO(await resp.read())
 
+async def _request(method="GET", url=None, data=None):
+    headers = {
+        "Host": "app.orderkuota.com",
+        "User-Agent": "okhttp/4.12.0",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    connector = ProxyConnector.from_url(PROXY_URL, rdns=True)
+    try:
+        async with aiohttp.ClientSession(connector=connector, timeout=TIMEOUT) as session:
+            async with session.request(method, url, headers=headers, data=data) as resp:
+                resp.raise_for_status()
+                return await resp.json()
+    except Exception as e:
+        return {"error": str(e)}
+
+async def get_transaction_qris(username, token):
+    payload = {
+        "app_reg_id": "cALcC0Q8RFCxqXnk4DVHPC:APA91bFH6qrkbsYFtCEJxrySnuk6F5Dg6AC4PzRpATkN_J7s--sLfebb89qCDp3Y86ElSoJ9S8UsNZpcIo61iWis2_e3cNIKDOPMpSYAH7a-XIE5EEaL7z4",
+        "phone_uuid": "cALcC0Q8RFCxqXnk4DVHPC",
+        "requests[qris_history][jenis]": "kredit",
+        "phone_model": "RMX3690",
+        "requests[qris_history][jumlah]": "",
+        "request_time": str(int(time.time()) * 1000),
+        "phone_android_version": "12",
+        "app_version_code": "250918",
+        "auth_username": username,
+        "requests[qris_history][page]": "1",
+        "auth_token": token,
+        "app_version_name": "25.09.18",
+        "ui_mode": "light",
+    }
+    result = await _request(
+        "POST",
+        f"https://app.orderkuota.com/api/v2/qris/mutasi/{token.split(':')[0]}",
+        data=payload,
+    )
+    res = result.get("qris_history", {})
+    if res == {}:
+        return None
+    return res
 
 user_repository = UserRepository()
 qris_repository = QrisRepository()
@@ -512,7 +555,7 @@ async def promo_v1_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -573,7 +616,7 @@ async def promo_host_pilihan_qris(update: Update, context: ContextTypes.DEFAULT_
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -634,7 +677,7 @@ async def promo_database_record_qris(update: Update, context: ContextTypes.DEFAU
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -711,7 +754,7 @@ async def callback_live_temp_qris(update: Update, context: ContextTypes.DEFAULT_
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -772,7 +815,7 @@ async def callback_host_pilihan_qris(update: Update, context: ContextTypes.DEFAU
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -833,7 +876,7 @@ async def callback_database_record_qris(update: Update, context: ContextTypes.DE
         )
         await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
         context.job_queue.run_repeating(
-            check_qris_payment, interval=60, first=30, user_id=user_id,
+            check_qris_payment, interval=30, first=10, user_id=user_id,
             data={
                 "total_price": total_price, 
                 "user_id": user_id, 
@@ -862,29 +905,6 @@ async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.message.reply_text("Anda tidak memiliki order yang sedang berlangsung.")
 
 """ Check payment """
-async def get_mutasi():
-    url = "https://orkut.ftvpn.me/api/mutasi"
-    payload = {
-        "auth_username": Config.ORDER_KUOTA_USERNAME,
-        "auth_token": Config.ORDER_KUOTA_AUTHTOKEN
-    }
-    headers = {
-        "Content-Type": "application/json"
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload, headers=headers) as resp:
-                resp.raise_for_status()
-                return await resp.json()
-    except Exception as e:
-        print("❌ Error:", e)
-        try:
-            data = await resp.json()
-            print(data)
-        except:
-            pass
-        return None
-
 async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
     user_id = job.data['user_id']
@@ -896,16 +916,17 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
     if not order:
         job.schedule_removal()
         return
-    
     expiry = order['expiry'].replace(tzinfo=pytz.UTC).astimezone(Config.TIMEZONE)
     msg_id = order['msg_id']
-    histories = await get_mutasi()
+    histories = await get_transaction_qris(Config.ORDER_KUOTA_USERNAME, Config.ORDER_KUOTA_AUTHTOKEN)
     if histories is None:
-        return
-    print("Getting success history:", histories["status"])
-    if histories["status"]:
-        for history in histories['data']:
-            if history['type'] == 'CR' and int(history['amount']) == total_price:
+        print("Retry with proxy....")
+        return await check_qris_payment(context)
+    print("Getting success history:", histories["success"])
+    if histories["success"]:
+        for history in histories['results']:
+            kredit = history["kredit"].replace(".", "")
+            if history['status'] == 'IN' and int(kredit) == total_price:
                 await qris_repository.remove_qris(user_id)
                 try:
                     await context.bot.delete_message(chat_id=user_id, message_id=msg_id)
