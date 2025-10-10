@@ -8,3 +8,5 @@ motor
 gunicorn
 uvicorn
 aiohttp
+aiohttp[speedups]
+aiohttp-socks
