@@ -22,8 +22,19 @@ async def remove_expired_vip_job(context: ContextTypes.DEFAULT_TYPE):
         if datetime.now(UTC).astimezone(TIMEZONE) > member["expiry"].astimezone(TIMEZONE):
             user_id = member["user_id"]
             try:
+                chat_member = await app.bot.get_chat_member(Config.CHANNEL_TEMP, user_id)
+                if chat_member.status in ["administrator", "creator"]:
+                    await vip_users.delete_one({"user_id": user_id})
+                    continue  # Lewati admin dan owner
+
+                await asyncio.sleep(5)
                 await app.bot.ban_chat_member(Config.CHANNEL_TEMP, user_id)
-                await app.bot.unban_chat_member(Config.CHANNEL_TEMP, user_id)
+                await asyncio.sleep(5)
+
+                chat_member = await app.bot.get_chat_member(Config.CHANNEL_TEMP, user_id)
+                await asyncio.sleep(5)
+                if chat_member.status in ["kicked", "restricted"]:
+                    await app.bot.unban_chat_member(Config.CHANNEL_TEMP, user_id)
                 await vip_users.delete_one({"user_id": user_id})
                 await asyncio.sleep(5)
             except Exception as e:
