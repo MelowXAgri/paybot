@@ -164,6 +164,9 @@ async def order_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("LIVE RECORD : PERBULAN", callback_data="live_temp_callback")],
         [InlineKeyboardButton("LIVE RECORD : HOST PILIHAN", callback_data="live_perm_v1")],
         [InlineKeyboardButton("LIVE RECORD : DATABASE", callback_data="live_perm_v2")],
+        [InlineKeyboardButton("BOKEP ASEAN JAV", callback_data="asean_jav")],
+        [InlineKeyboardButton("BOKEP INDO VIRAL", callback_data="indo_viral")],
+        [InlineKeyboardButton("REKAMAN NGINTIP / CCTV", callback_data="ngintip_cctv")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
@@ -888,6 +891,189 @@ async def callback_database_record_qris(update: Update, context: ContextTypes.DE
     except Exception as e:
         print(e)
 
+async def callback_asean_jav_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.answer()
+    user_id = update.callback_query.from_user.id
+    username = update.callback_query.from_user.username
+    if await qris_repository.qris.find_one({"user_id": user_id}):
+        try:
+            await update.callback_query.edit_message_text(
+                text="Anda masih memiliki order yang sedang berlangsung.\n\nSilahkan batalkan order dengan perintah /cancel terlebih dahulu sebelum melakukan order baru."
+            )
+        except:
+            pass
+        return
+    price = PERMANENT['asean_jav']['price']['default']['price']
+    duration = 0
+    while True:
+        unique_code = random.randint(100, 999)
+        total_price = price + unique_code
+        existing_price = await qris_repository.qris.find_one({"price": total_price})
+        if not existing_price:
+            break
+    qris_url, qris_code = get_qris_payment(total_price)
+    qris_expired = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=10)
+    try:
+        await update.callback_query.delete_message()
+    except:
+        pass
+    caption = (
+        "Scan QRIS ini untuk pembayaran.\n\n"
+        f"<b>Jumlah:</b> Rp {total_price}\n"
+        f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("CANCEL", callback_data="cancel")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=30, first=10, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "asean_jav"
+            }
+        )
+    except Exception as e:
+        print(e)
+
+async def callback_cctv_ngintip_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.answer()
+    user_id = update.callback_query.from_user.id
+    username = update.callback_query.from_user.username
+    if await qris_repository.qris.find_one({"user_id": user_id}):
+        try:
+            await update.callback_query.edit_message_text(
+                text="Anda masih memiliki order yang sedang berlangsung.\n\nSilahkan batalkan order dengan perintah /cancel terlebih dahulu sebelum melakukan order baru."
+            )
+        except:
+            pass
+        return
+    price = PERMANENT['ngintip_cctv']['price']['default']['price']
+    duration = 0
+    while True:
+        unique_code = random.randint(100, 999)
+        total_price = price + unique_code
+        existing_price = await qris_repository.qris.find_one({"price": total_price})
+        if not existing_price:
+            break
+    qris_url, qris_code = get_qris_payment(total_price)
+    qris_expired = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=10)
+    try:
+        await update.callback_query.delete_message()
+    except:
+        pass
+    caption = (
+        "Scan QRIS ini untuk pembayaran.\n\n"
+        f"<b>Jumlah:</b> Rp {total_price}\n"
+        f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("CANCEL", callback_data="cancel")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=30, first=10, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "ngintip_cctv"
+            }
+        )
+    except Exception as e:
+        print(e)
+
+async def callback_indo_viral_qris(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.answer()
+    user_id = update.callback_query.from_user.id
+    username = update.callback_query.from_user.username
+    if await qris_repository.qris.find_one({"user_id": user_id}):
+        try:
+            await update.callback_query.edit_message_text(
+                text="Anda masih memiliki order yang sedang berlangsung.\n\nSilahkan batalkan order dengan perintah /cancel terlebih dahulu sebelum melakukan order baru."
+            )
+        except:
+            pass
+        return
+    price = PERMANENT['indo_viral']['price']['default']['price']
+    duration = 0
+    while True:
+        unique_code = random.randint(100, 999)
+        total_price = price + unique_code
+        existing_price = await qris_repository.qris.find_one({"price": total_price})
+        if not existing_price:
+            break
+    qris_url, qris_code = get_qris_payment(total_price)
+    qris_expired = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=10)
+    try:
+        await update.callback_query.delete_message()
+    except:
+        pass
+    caption = (
+        "Scan QRIS ini untuk pembayaran.\n\n"
+        f"<b>Jumlah:</b> Rp {total_price}\n"
+        f"<b>Expired:</b> {qris_expired.strftime('%H:%M:%S WIB')}\n\n"
+        "QRIS akan kadaluarsa dalam 10 menit.\n\n\n"
+        "<blockquote>"
+        "Note: Jika sudah melakukan pembayaran , tunggu 1-5 menit , bot akan mengirimkan link."
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("CANCEL", callback_data="cancel")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        img_bytes = await download_file(qris_url)
+        msg = await update.callback_query.message.reply_photo(
+            img_bytes,
+            caption=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+        await qris_repository.add_qris(user_id, msg.id, duration, qris_code, qris_url, qris_expired.astimezone(UTC))
+        context.job_queue.run_repeating(
+            check_qris_payment, interval=30, first=10, user_id=user_id,
+            data={
+                "total_price": total_price, 
+                "user_id": user_id, 
+                "username": username, 
+                "msg_id": msg.id, 
+                "subscription": "indo_viral"
+            }
+        )
+    except Exception as e:
+        print(e)
+
 async def callback_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
     user_id = update.callback_query.from_user.id
@@ -938,6 +1124,12 @@ async def check_qris_payment(context: ContextTypes.DEFAULT_TYPE):
                     await permanent_v1_success(context.bot, user_id, "lifetime", username)
                 elif subscription == "database_record":
                     await permanent_v2_success(context.bot, user_id, "lifetime", username)
+                elif subscription == "asean_jav":
+                    await asean_jav_success(context.bot, user_id, "lifetime", username)
+                elif subscription == "ngintip_cctv":
+                    await cctv_ngintip_success(context.bot, user_id, "lifetime", username)
+                elif subscription == "indo_viral":
+                    await indo_viral_success(context.bot, user_id, "lifetime", username)
                 job.schedule_removal()
                 return
     
@@ -1043,6 +1235,93 @@ async def permanent_v2_success(bot_instance, user_id, duration, username=""):
     )
     await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
 
+""" Successfull payment button 4 """
+async def create_perm_link_asean(bot_instance):
+    try:
+        chat = await bot_instance.get_chat(Config.CHANNEL_JAV)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_JAV, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
+
+async def asean_jav_success(bot_instance, user_id, duration, username=""):
+    try:
+        invite_link = await create_perm_link_asean(bot_instance)
+    except:
+        print(f"Failed: ( {Config.CHANNEL_JAV} ) | ( {user_id} ) | ( {username} )")
+    await user_repository.add_perm_v2(user_id)
+    caption = (
+        "🎉 Pembayaran berhasil!\n\n"
+        f"🔥 Link: {invite_link}\n\n"
+        "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
+    )
+    await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+
+""" Successfull payment button 5 """
+async def create_perm_link_cctv(bot_instance):
+    try:
+        chat = await bot_instance.get_chat(Config.CHANNEL_CCTV)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_CCTV, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
+
+async def cctv_ngintip_success(bot_instance, user_id, duration, username=""):
+    try:
+        invite_link = await create_perm_link_cctv(bot_instance)
+    except:
+        print(f"Failed: ( {Config.CHANNEL_CCTV} ) | ( {user_id} ) | ( {username} )")
+    await user_repository.add_perm_v2(user_id)
+    caption = (
+        "🎉 Pembayaran berhasil!\n\n"
+        f"🔥 Link: {invite_link}\n\n"
+        "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
+    )
+    await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+
+""" Successfull payment button 5 """
+async def create_perm_link_indo(bot_instance):
+    try:
+        chat = await bot_instance.get_chat(Config.CHANNEL_INDO)
+        expiry = datetime.now(UTC).astimezone(Config.TIMEZONE) + timedelta(minutes=60)
+        try:
+            invite_link = await bot_instance.create_chat_invite_link(
+                chat_id=Config.CHANNEL_INDO, expire_date=expiry, creates_join_request=True
+            )
+            return invite_link.invite_link
+        except Exception as e:
+            return str(e)
+    except Exception as e:
+        print(e)
+        return str(e)
+
+async def indo_viral_success(bot_instance, user_id, duration, username=""):
+    try:
+        invite_link = await create_perm_link_indo(bot_instance)
+    except:
+        print(f"Failed: ( {Config.CHANNEL_INDO} ) | ( {user_id} ) | ( {username} )")
+    await user_repository.add_perm_v2(user_id)
+    caption = (
+        "🎉 Pembayaran berhasil!\n\n"
+        f"🔥 Link: {invite_link}\n\n"
+        "⚠️ NOTE !\nLink akan kadaluarsa dalam 1 jam!"
+    )
+    await bot_instance.send_message(chat_id=user_id, text=caption, parse_mode=ParseMode.HTML)
+    
 """ Button Back Callback Handler """
 async def back_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
@@ -1057,9 +1336,12 @@ async def back_callback_handler(update: Update, context: ContextTypes.DEFAULT_TY
         "</blockquote>"
     )
     keyboard = [
-        [InlineKeyboardButton("LIVE RECORD : PERBULAN ( V1 )", callback_data="live_temp_callback")],
+        [InlineKeyboardButton("LIVE RECORD : PERBULAN", callback_data="live_temp_callback")],
         [InlineKeyboardButton("LIVE RECORD : HOST PILIHAN", callback_data="live_perm_v1")],
         [InlineKeyboardButton("LIVE RECORD : DATABASE", callback_data="live_perm_v2")],
+        [InlineKeyboardButton("BOKEP ASEAN JAV", callback_data="asean_jav")],
+        [InlineKeyboardButton("BOKEP INDO VIRAL", callback_data="indo_viral")],
+        [InlineKeyboardButton("REKAMAN NGINTIP / CCTV", callback_data="ngintip_cctv")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     try:
@@ -1120,3 +1402,49 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_PERM_2, user_id=user_id)
             await context.bot.send_message(user_id, "Anda belum berlangganan DATABASE RECORD.")
+    elif req.chat.id == Config.CHANNEL_JAV:
+        member = await user_repository.perm_v2.find_one({"user_id": user_id})
+        if member:
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_JAV, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_JAV:", e)
+                return
+            await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
+        else:
+            await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_JAV, user_id=user_id)
+            await context.bot.send_message(user_id, "Anda belum berlangganan ASEAN JAV.")
+    elif req.chat.id == Config.CHANNEL_CCTV:
+        member = await user_repository.perm_v2.find_one({"user_id": user_id})
+        if member:
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_CCTV, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_CCTV:", e)
+                return
+            await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
+        else:
+            await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_CCTV, user_id=user_id)
+            await context.bot.send_message(user_id, "Anda belum berlangganan CCTV NGINTIP.")
+    elif req.chat.id == Config.CHANNEL_INDO:
+        member = await user_repository.perm_v2.find_one({"user_id": user_id})
+        if member:
+            try:
+                await context.bot.approve_chat_join_request(chat_id=Config.CHANNEL_INDO, user_id=user_id)
+            except Exception as e:
+                if "User_already_participant" in str(e):
+                    return
+                else:
+                    print("Error accept member CHANNEL_INDO:", e)
+                return
+            await context.bot.send_message(user_id, "Permintaan join Anda telah disetujui!")
+        else:
+            await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_INDO, user_id=user_id)
+            await context.bot.send_message(user_id, "Anda belum berlangganan INDO VIRAL.")
+    

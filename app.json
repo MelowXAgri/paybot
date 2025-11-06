@@ -35,6 +35,21 @@
             "value": "-1003099178684",
             "required": true
         },
+        "CHANNEL_JAV": {
+            "description": "Telegram Channel ID GROUP JAV",
+            "value": "-1002597800834",
+            "required": true
+        },
+        "CHANNEL_CCTV": {
+            "description": "Telegram Channel ID GROUP CCTV",
+            "value": "-1002626619053",
+            "required": true
+        },
+        "CHANNEL_INDO": {
+            "description": "Telegram Channel ID GROUP INDO VIRAL",
+            "value": "-1002538017511",
+            "required": true
+        },
         "ADMIN_ID": {
             "description": "Bot Admin ID, split with comma",
             "value": "692043981,1516420756,7481738979,7830551403",

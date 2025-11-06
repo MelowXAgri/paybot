@@ -5,6 +5,9 @@ class Config:
     CHANNEL_TEMP   = int(os.getenv("CHANNEL_ID", "-1002633596412"))
     CHANNEL_PERM_1 = int(os.getenv("CHANNEL_ID_1", "-1002633596412"))
     CHANNEL_PERM_2 = int(os.getenv("CHANNEL_ID_2", "-1002633596412"))
+    CHANNEL_JAV    = int(os.getenv("CHANNEL_JAV", "-1002633596412"))
+    CHANNEL_CCTV   = int(os.getenv("CHANNEL_CCTV", "-1002633596412"))
+    CHANNEL_INDO   = int(os.getenv("CHANNEL_INDO", "-1002633596412"))
     ADMIN_ID       = [int(id) for id in os.getenv("ADMIN_ID", "692043981,1516420756,7481738979,7830551403").split(",")]
     
     FORCE_SUB_CHANNEL_ID   = int(os.getenv("FORCE_SUB_CHANNEL_ID", "-1002601296115"))

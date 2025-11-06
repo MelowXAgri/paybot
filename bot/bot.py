@@ -13,6 +13,9 @@ from .callback import (
     
     callback_host_pilihan,
     callback_database_record,
+    callback_jav_asean,
+    callback_cctv_ngintip,
+    callback_indo_viral,
 )
 from .handler import (
     start_command,
@@ -38,6 +41,9 @@ from .handler import (
     vipbroadcast_handler,
     broadcast_and_pin_handler,
     vipbroadcast_and_pin_handler,
+    callback_asean_jav_qris,
+    callback_cctv_ngintip_qris,
+    callback_indo_viral_qris,
 )
 from .subscriber import refresh_callback
 
@@ -86,6 +92,18 @@ class TelegramBot:
         #PERMANENT GROUP BUTTON 3 ORDER
         self.app.add_handler(CallbackQueryHandler(callback_database_record, pattern="^live_perm_v2$"))
         self.app.add_handler(CallbackQueryHandler(callback_database_record_qris, pattern="^database_record$"))
+        
+        #PERMANENT GROUP BUTTON 4 ORDER
+        self.app.add_handler(CallbackQueryHandler(callback_jav_asean, pattern="^asean_jav$"))
+        self.app.add_handler(CallbackQueryHandler(callback_asean_jav_qris, pattern="^asean_jav_price$"))
+        
+        #PERMANENT GROUP BUTTON 5 ORDER
+        self.app.add_handler(CallbackQueryHandler(callback_cctv_ngintip, pattern="^ngintip_cctv$"))
+        self.app.add_handler(CallbackQueryHandler(callback_cctv_ngintip_qris, pattern="^ngintip_cctv_price$"))
+        
+        #PERMANENT GROUP BUTTON 6 ORDER
+        self.app.add_handler(CallbackQueryHandler(callback_indo_viral, pattern="^indo_viral$"))
+        self.app.add_handler(CallbackQueryHandler(callback_indo_viral_qris, pattern="^indo_viral_price$"))
 
         self.app.add_handler(CallbackQueryHandler(back_callback_handler, pattern="^back_callback$"))
         

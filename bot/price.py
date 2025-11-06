@@ -61,7 +61,46 @@ PERMANENT = {
                 "label": "IDR 350.000"
             }
         }
-    }
+    },
+    "asean_jav": {
+        "label": "ASEAN JAV",
+        "price": {
+            "default": {
+                "price": 100000,
+                "label": "IDR 100.000"
+            },
+            "promo": {
+                "price": 100000,
+                "label": "IDR 100.000"
+            }
+        }
+    },
+    "ngintip_cctv": {
+        "label": "CCTV NGINTIP",
+        "price": {
+            "default": {
+                "price": 100000,
+                "label": "IDR 100.000"
+            },
+            "promo": {
+                "price": 100000,
+                "label": "IDR 100.000"
+            }
+        }
+    },
+    "indo_viral": {
+        "label": "INDO VIRAL",
+        "price": {
+            "default": {
+                "price": 120000,
+                "label": "IDR 120.000"
+            },
+            "promo": {
+                "price": 120000,
+                "label": "IDR 120.000"
+            }
+        }
+    },
 }
 
 

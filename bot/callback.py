@@ -174,3 +174,135 @@ async def callback_database_record(update: Update, context: ContextTypes.DEFAULT
         )
     except:
         pass
+
+""" GROUP PERMANENT JAV ASEAN """
+async def callback_jav_asean(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    vip_user = False
+    if vip_user:
+        invite_link = await create_perm_link_v1(context.bot)
+        caption = (
+            "<blockquote>"
+            "Anda sudah berlangganan!\n\n"
+            f"Klik link ini untuk join grup ASEAN JAV: <a href='{invite_link}'>Join JAV</a>\n"
+            "Link akan kadaluarsa dalam 1 jam!"
+            "</blockquote>"
+        )
+        try:
+            await update.callback_query.delete_message()
+            await update.callback_query.message.reply_text(
+                text=caption,
+                parse_mode=ParseMode.HTML
+            )
+        except:
+            pass
+        return
+    caption = (
+        "<blockquote>"
+        f"BOKEP ASEAN JAV\n"
+        "  • PERMANEN\n"
+        "  • UPDATE SETIAP HARI\n"
+        f"  • {PERMANENT['asean_jav']['price']['default']['label']}"
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("QRIS", callback_data=f"asean_jav_price")],
+        [InlineKeyboardButton("Kembali", callback_data="back_callback")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        await update.callback_query.edit_message_text(
+            text=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+    except:
+        pass
+
+""" GROUP PERMANENT CCTV NGIBTIP """
+async def callback_cctv_ngintip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    vip_user = False
+    if vip_user:
+        invite_link = await create_perm_link_v1(context.bot)
+        caption = (
+            "<blockquote>"
+            "Anda sudah berlangganan!\n\n"
+            f"Klik link ini untuk join grup CCTV NGINTIP: <a href='{invite_link}'>Join Group</a>\n"
+            "Link akan kadaluarsa dalam 1 jam!"
+            "</blockquote>"
+        )
+        try:
+            await update.callback_query.delete_message()
+            await update.callback_query.message.reply_text(
+                text=caption,
+                parse_mode=ParseMode.HTML
+            )
+        except:
+            pass
+        return
+    caption = (
+        "<blockquote>"
+        f"REKAMAN NGINTIP / CCTV\n"
+        "  • PERMANEN\n"
+        "  • UPDATE SETIAP HARI\n"
+        f"  • {PERMANENT['ngintip_cctv']['price']['default']['label']}"
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("QRIS", callback_data=f"ngintip_cctv_price")],
+        [InlineKeyboardButton("Kembali", callback_data="back_callback")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        await update.callback_query.edit_message_text(
+            text=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+    except:
+        pass
+
+""" GROUP PERMANENT INDO VIRAL """
+async def callback_indo_viral(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.callback_query.from_user.id
+    vip_user = False
+    if vip_user:
+        invite_link = await create_perm_link_v1(context.bot)
+        caption = (
+            "<blockquote>"
+            "Anda sudah berlangganan!\n\n"
+            f"Klik link ini untuk join grup INDO VIRAL: <a href='{invite_link}'>Join Group</a>\n"
+            "Link akan kadaluarsa dalam 1 jam!"
+            "</blockquote>"
+        )
+        try:
+            await update.callback_query.delete_message()
+            await update.callback_query.message.reply_text(
+                text=caption,
+                parse_mode=ParseMode.HTML
+            )
+        except:
+            pass
+        return
+    caption = (
+        "<blockquote>"
+        f"BOKEP INDO VIRAL\n"
+        "  • PERMANEN\n"
+        "  • UPDATE SETIAP HARI\n"
+        f"  • {PERMANENT['indo_viral']['price']['default']['label']}"
+        "</blockquote>"
+    )
+    keyboard = [
+        [InlineKeyboardButton("QRIS", callback_data=f"indo_viral_price")],
+        [InlineKeyboardButton("Kembali", callback_data="back_callback")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    try:
+        await update.callback_query.edit_message_text(
+            text=caption,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML
+        )
+    except:
+        pass
