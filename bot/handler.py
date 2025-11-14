@@ -21,7 +21,7 @@ from .price import PRICE, PERMANENT, PROMO_V1, get_qris_payment
 from .subscriber import force_sub_channel, refresh_callback
 from io import BytesIO
 
-PROXY_URL = "socks5://a0b7T4I2E4y9:M8I0Z1R1q0m8@45.196.227.212:9139"  # ubah sesuai proxy lo
+PROXY_URL = "socks5://YNtVtMrf:NedyYDqp@45.195.172.135:64127"
 TIMEOUT = aiohttp.ClientTimeout(total=15)
 
 async def download_file(url: str) -> BytesIO:
@@ -1447,4 +1447,5 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
         else:
             await context.bot.decline_chat_join_request(chat_id=Config.CHANNEL_INDO, user_id=user_id)
             await context.bot.send_message(user_id, "Anda belum berlangganan INDO VIRAL.")
+
     
