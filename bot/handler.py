@@ -36,7 +36,9 @@ async def _request(method="GET", url=None, data=None):
         "User-Agent": "okhttp/4.12.0",
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    connector = ProxyConnector.from_url(PROXY_URL, rdns=True)
+    connector = ProxyConnector.from_url(
+        "socks5://YNtVtMrf:NedyYDqp@170.168.215.122:63919"
+    )
     try:
         async with aiohttp.ClientSession(connector=connector, timeout=TIMEOUT) as session:
             async with session.request(method, url, headers=headers, data=data) as resp:
@@ -1449,3 +1451,4 @@ async def handle_chat_join_request(update: Update, context: ContextTypes.DEFAULT
             await context.bot.send_message(user_id, "Anda belum berlangganan INDO VIRAL.")
 
     
+
